@@ -70,25 +70,22 @@
             function resizeCanvas() {
                 const width = window.innerWidth;
                 const height = window.innerHeight;
-                chakraCanvas.width = width * canvasZoom;
-                chakraCanvas.height = height * canvasZoom;
-                chakraCanvas.style.width = `${width}px`;
-                chakraCanvas.style.height = `${height}px`;
-                chakraCanvas.style.transform = `scale(${1 / canvasZoom})`;
-                chakraCanvas.style.transformOrigin = 'center center';
+                chakraCanvas.width = width;
+                chakraCanvas.height = height;
+                ctx.scale(canvasZoom, canvasZoom);
             }
 
             resizeCanvas();
 
             // Chakra configuration with colors and descriptions from the Vedas
             const chakras = [
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.9, sides: 4, color: '#FF0000' }, // Red - Root Chakra (Muladhara)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.75, sides: 6, color: '#FF7F00' }, // Orange - Sacral Chakra (Svadhisthana)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.6, sides: 10, color: '#FFFF00' }, // Yellow - Solar Plexus Chakra (Manipura)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height / 2, sides: 12, color: '#00FF00' }, // Green - Heart Chakra (Anahata)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.4, sides: 16, color: '#0000FF' }, // Blue - Throat Chakra (Vishuddha)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.25, sides: 24, color: '#4B0082' }, // Indigo - Third Eye Chakra (Ajna)
-                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.1, sides: 32, color: '#8B00FF' } // Violet - Crown Chakra (Sahasrara)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.9, sides: 4, color: '#FF0000' }, // Red - Root Chakra (Muladhara)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.75, sides: 6, color: '#FF7F00' }, // Orange - Sacral Chakra (Svadhisthana)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.6, sides: 10, color: '#FFFF00' }, // Yellow - Solar Plexus Chakra (Manipura)
+                { x: window.innerWidth / 2, y: window.innerHeight / 2, sides: 12, color: '#00FF00' }, // Green - Heart Chakra (Anahata)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.4, sides: 16, color: '#0000FF' }, // Blue - Throat Chakra (Vishuddha)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.25, sides: 24, color: '#4B0082' }, // Indigo - Third Eye Chakra (Ajna)
+                { x: window.innerWidth / 2, y: window.innerHeight * 0.1, sides: 32, color: '#8B00FF' } // Violet - Crown Chakra (Sahasrara)
             ];
 
             // Function to draw 3D wave
@@ -105,7 +102,8 @@
 
             // Function to animate waves
             function animateWaves() {
-                ctx.clearRect(0, 0, chakraCanvas.width, chakraCanvas.height);
+                ctx.setTransform(canvasZoom, 0, 0, canvasZoom, 0, 0);
+                ctx.clearRect(0, 0, chakraCanvas.width / canvasZoom, chakraCanvas.height / canvasZoom);
 
                 chakras.forEach(chakra => {
                     const { x, y, sides, color } = chakra;
@@ -114,7 +112,7 @@
                     let colorShift = 0;
 
                     function drawChakraWaves() {
-                        if (radius > chakraCanvas.width * zoom) {
+                        if (radius > chakraCanvas.width / canvasZoom * zoom) {
                             radius = 0;
                         }
 
