@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakra Waves Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+
+        canvas {
+            position: absolute;
+        }
+
+        #zoomSlider, #moireSlider {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+
+        #moireSlider {
+            top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="chakraCanvas"></canvas>
+    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+    <input type="range" id="moireSlider" min="1" max="10" step="0.1" value="2">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chakraCanvas = document.getElementById('chakraCanvas');
+            const ctx = chakraCanvas.getContext('2d');
+            const zoomSlider = document.getElementById('zoomSlider');
+            const moireSlider = document.getElementById('moireSlider');
+            let zoom = parseFloat(zoomSlider.value);
+            let moireEffect = parseFloat(moireSlider.value);
+
+            chakraCanvas.width = window.innerWidth;
+            chakraCanvas.height = window.innerHeight;
+
+            // Chakra configuration with colors and descriptions from the Vedas
+            const chakras = [
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.9, sides: 4, color: '#FF0000' }, // Red - Root Chakra (Muladhara)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.75, sides: 6, color: '#FF7F00' }, // Orange - Sacral Chakra (Svadhisthana)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.6, sides: 10, color: '#FFFF00' }, // Yellow - Solar Plexus Chakra (Manipura)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height / 2, sides: 12, color: '#00FF00' }, // Green - Heart Chakra (Anahata)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.4, sides: 16, color: '#0000FF' }, // Blue - Throat Chakra (Vishuddha)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.25, sides: 24, color: '#4B0082' }, // Indigo - Third Eye Chakra (Ajna)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.1, sides: 32, color: '#8B00FF' } // Violet - Crown Chakra (Sahasrara)
+            ];
+
+            // Function to draw 3D wave
+            function drawWave(x, y, radius, color, sides) {
+                ctx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = i * 2 * Math.PI / sides;
+                    ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+                }
+                ctx.closePath();
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+
+            // Function to animate waves
+            function animateWaves() {
+                ctx.clearRect(0, 0, chakraCanvas.width, chakraCanvas.height);
+
+                chakras.forEach(chakra => {
+                    const { x, y, sides, color } = chakra;
+                    let radius = 0;
+                    const colorShiftSpeed = 0.05;
+                    let colorShift = 0;
+
+                    function drawChakraWaves() {
+                        if (radius > chakraCanvas.width * zoom) {
+                            radius = 0;
+                        }
+
+                        const intensity = (Math.sin(colorShift) + 1) / 2;
+                        const adjustedColor = `rgba(${hexToRgb(color).r * intensity}, ${hexToRgb(color).g * intensity}, ${hexToRgb(color).b * intensity}, 1)`;
+
+                        drawWave(x, y, radius * zoom, adjustedColor, sides);
+
+                        radius += moireEffect;
+                        colorShift += colorShiftSpeed;
+                        requestAnimationFrame(drawChakraWaves);
+                    }
+
+                    drawChakraWaves();
+                });
+            }
+
+            // Helper function to convert hex color to RGB
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return { r, g, b };
+            }
+
+            // Update zoom and moiré effect based on sliders
+            zoomSlider.addEventListener('input', function() {
+                zoom = parseFloat(zoomSlider.value);
+                animateWaves();
+            });
+
+            moireSlider.addEventListener('input', function() {
+                moireEffect = parseFloat(moireSlider.value);
+                animateWaves();
+            });
+
+            animateWaves();
+        });
+    </script>
+</body>
+</html>
