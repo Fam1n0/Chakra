@@ -68,10 +68,14 @@
             let canvasZoom = parseFloat(canvasZoomSlider.value);
 
             function resizeCanvas() {
-                chakraCanvas.width = window.innerWidth * canvasZoom;
-                chakraCanvas.height = window.innerHeight * canvasZoom;
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                chakraCanvas.width = width * canvasZoom;
+                chakraCanvas.height = height * canvasZoom;
+                chakraCanvas.style.width = `${width}px`;
+                chakraCanvas.style.height = `${height}px`;
                 chakraCanvas.style.transform = `scale(${1 / canvasZoom})`;
-                chakraCanvas.style.transformOrigin = '0 0';
+                chakraCanvas.style.transformOrigin = 'center center';
             }
 
             resizeCanvas();
