@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakra Waves Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
 
+        canvas {
+            position: absolute;
+        }
+
+        #zoomSlider {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="chakraCanvas"></canvas>
+    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chakraCanvas = document.getElementById('chakraCanvas');
+            const ctx = chakraCanvas.getContext('2d');
+            const zoomSlider = document.getElementById('zoomSlider');
+            let zoom = parseFloat(zoomSlider.value);
+            let orientationData = { alpha: 0, beta: 0, gamma: 0 };
+
+            chakraCanvas.width = window.innerWidth;
+            chakraCanvas.height = window.innerHeight;
+
+            // Chakra configuration with colors and descriptions from the Vedas
+            const chakras = [
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.9, sides: 4, color: '#FF0000', pitch: 440 }, // Red - Root Chakra (Muladhara)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.75, sides: 6, color: '#FF7F00', pitch: 493.88 }, // Orange - Sacral Chakra (Svadhisthana)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.6, sides: 10, color: '#FFFF00', pitch: 523.25 }, // Yellow - Solar Plexus Chakra (Manipura)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height / 2, sides: 12, color: '#00FF00', pitch: 587.33 }, // Green - Heart Chakra (Anahata)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.4, sides: 16, color: '#0000FF', pitch: 659.25 }, // Blue - Throat Chakra (Vishuddha)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.25, sides: 24, color: '#4B0082', pitch: 698.46 }, // Indigo - Third Eye Chakra (Ajna)
+                { x: chakraCanvas.width / 2, y: chakraCanvas.height * 0.1, sides: 32, color: '#8B00FF', pitch: 783.99 } // Violet - Crown Chakra (Sahasrara)
+            ];
+
+            // Function to draw 3D wave
+            function drawWave(x, y, radius, color, sides, angleOffset) {
+                ctx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = i * 2 * Math.PI / sides + angleOffset;
+                    ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+                }
+                ctx.closePath();
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+
+            // Function to animate waves
+            function animateWaves() {
+                ctx.clearRect(0, 0, chakraCanvas.width, chakraCanvas.height);
+
+                const time = new Date();
+                const seconds = time.getSeconds() + time.getMilliseconds() / 1000;
+                const angleOffset = (seconds * (2 * Math.PI / 60)) + (orientationData.alpha * Math.PI / 180);
+
+                chakras.forEach(chakra => {
+                    const { x, y, sides, color, pitch } = chakra;
+                    let radius = 0;
+                    const colorShiftSpeed = 0.05;
+                    let colorShift = 0;
+
+                    function drawChakraWaves() {
+                        if (radius > chakraCanvas.width * zoom) {
+                            radius = 0;
+                        }
+
+                        const intensity = (Math.sin(colorShift) + 1) / 2;
+                        const adjustedColor = `rgba(${hexToRgb(color).r * intensity}, ${hexToRgb(color).g * intensity}, ${hexToRgb(color).b * intensity}, 1)`;
+
+                        drawWave(x, y, radius * zoom, adjustedColor, sides, angleOffset);
+
+                        radius += 2;
+                        colorShift += colorShiftSpeed;
+                        requestAnimationFrame(drawChakraWaves);
+                    }
+
+                    drawChakraWaves();
+                });
+            }
+
+            // Helper function to convert hex color to RGB
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return { r, g, b };
+            }
+
+            // Update zoom level based on slider
+            zoomSlider.addEventListener('input', function() {
+                zoom = parseFloat(zoomSlider.value);
+                animateWaves();
+            });
+
+            // Function to determine flow based on I Ching hexagram
+            function determineFlow(hexagram) {
+                // Simplified example of determining flow based on hexagram
+                const flows = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest', 'Up', 'Down', 'Inward', 'Outward'];
+                const index = parseInt(hexagram, 2) % flows.length;
+                return flows[index];
+            }
+
+            // Generate a random hexagram
+            function generateHexagram() {
+                let hexagram = '';
+                for (let i = 0; i < 6; i++) {
+                    hexagram += Math.random() > 0.5 ? '1' : '0';
+                }
+                return hexagram;
+            }
+
+            // Simulate generating and applying hexagrams to chakras
+            chakras.forEach(chakra => {
+                const hexagram = generateHexagram();
+                const flowDirection = determineFlow(hexagram);
+                console.log(`Chakra: ${chakra.color}, Hexagram: ${hexagram}, Flow Direction: ${flowDirection}`);
+            });
+
+            // Listen for device orientation events
+            window.addEventListener('deviceorientation', function(event) {
+                orientationData.alpha = event.alpha;
+                orientationData.beta = event.beta;
+                orientationData.gamma = event.gamma;
+                animateWaves(); // Ensure waves are animated when orientation changes
+            });
+
+            animateWaves();
+        });
+    </script>
+</body>
+</html>
