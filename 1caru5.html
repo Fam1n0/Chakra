@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1caru5</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            touch-action: manipulation;
+        }
+
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input[type="range"] {
+            width: 150px;
+        }
+
+        button {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="chakraCanvas"></canvas>
+    <div id="controls" class="controls">
+        <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+        <button id="captureButton">Capture Image</button>
+        <button id="fullscreenButton">Toggle Fullscreen</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chakraCanvas = document.getElementById('chakraCanvas');
+            const ctx = chakraCanvas.getContext('2d');
+            const zoomSlider = document.getElementById('zoomSlider');
+            const captureButton = document.getElementById('captureButton');
+            const fullscreenButton = document.getElementById('fullscreenButton');
+            const controls = document.getElementById('controls');
+            let zoom = parseFloat(zoomSlider.value);
+            let orientationData = { alpha: 0, beta: 0, gamma: 0 };
+            let feedbackData = JSON.parse(localStorage.getItem('feedbackData')) || [];
+            let weights = [1, 1, 1]; // Initial weights for feedback, time, and orientation
+
+            // Teaching Icarus: Fibonacci Sequence
+            function fibonacci(n) {
+                return n <= 1 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+            }
+
+            // Teaching Icarus: Fractals
+            function drawFractal(x, y, size, depth) {
+                if (depth === 0) {
+                    ctx.fillRect(x, y, size, size);
+                    return;
+                }
+                size /= 3;
+                drawFractal(x, y, size, depth - 1);
+                drawFractal(x + size, y, size, depth - 1);
+                drawFractal(x + 2 * size, y, size, depth - 1);
+                drawFractal(x, y + size, size, depth - 1);
+                drawFractal(x + 2 * size, y + size, size, depth - 1);
+                drawFractal(x, y + 2 * size, size, depth - 1);
+                drawFractal(x + size, y + 2 * size, size, depth - 1);
+                drawFractal(x + 2 * size, y + 2 * size, size, depth - 1);
+            }
+
+            // Teaching Icarus: Philosophy of Art
+            function evaluateArtQuality(fibonacciValue, fractalDepth) {
+                return fibonacciValue * fractalDepth;
+            }
+
+            function resizeCanvas() {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                chakraCanvas.width = width;
+                chakraCanvas.height = height;
+                ctx.scale(1, 1);
+            }
+
+            resizeCanvas();
+
+            function drawWave(x, y, radius, color, sides, angleOffset) {
+                ctx.beginPath();
+                for (let i = 0; i < sides; i++) {
+                    const angle = i * 2 * Math.PI / sides + angleOffset;
+                    ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle));
+                }
+                ctx.closePath();
+                ctx.strokeStyle = color;
+                ctx.stroke();
+            }
+
+            function animateWaves() {
+                ctx.clearRect(0, 0, chakraCanvas.width, chakraCanvas.height);
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, chakraCanvas.width, chakraCanvas.height);
+
+                const time = new Date();
+                const seconds = time.getSeconds() + time.getMilliseconds() / 1000;
+                const angleOffset = (seconds * (2 * Math.PI / 60)) + (orientationData.alpha * Math.PI / 180);
+
+                chakras.forEach(chakra => {
+                    const { x, y, sides, color, pitch, intensity, amplitude, speed } = chakra;
+                    let radius = 0;
+                    const colorShiftSpeed = 0.05 * speed;
+                    let colorShift = 0;
+
+                    function drawChakraWaves() {
+                        if (radius > chakraCanvas.width * zoom) {
+                            radius = 0;
+                        }
+
+                        const adjustedIntensity = (Math.sin(colorShift) * intensity + 1) / 2;
+                        const adjustedColor = `rgba(${hexToRgb(color).r * adjustedIntensity}, ${hexToRgb(color).g * adjustedIntensity}, ${hexToRgb(color).b * adjustedIntensity}, 1)`;
+
+                        drawWave(x, y, radius * zoom * amplitude, adjustedColor, sides, angleOffset);
+
+                        radius += 2;
+                        colorShift += colorShiftSpeed;
+                        requestAnimationFrame(drawChakraWaves);
+                    }
+
+                    drawChakraWaves();
+                });
+            }
+
+            function hexToRgb(hex) {
+                const bigint = parseInt(hex.slice(1), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = (bigint & 255);
+                return { r, g, b };
+            }
+
+            zoomSlider.addEventListener('input', function() {
+                zoom = parseFloat(zoomSlider.value);
+                animateWaves();
+            });
+
+            function determineFlow(hexagram) {
+                const flows = ['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest', 'Up', 'Down', 'Inward', 'Outward'];
+                const index = parseInt(hexagram, 2) % flows.length;
+                return flows[index];
+            }
+
+            function generateHexagram() {
+                let hexagram = '';
+                for (let i = 0; i < 6; i++) {
+                    hexagram += Math.random() > 0.5 ? '1' : '0';
+                }
+                return hexagram;
+            }
+
+            function captureImage() {
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const goldenRatioHeight = chakraCanvas.width / 1.618; // Calculate height based on golden ratio
+                const canvas = document.createElement('canvas');
+                canvas.width = chakraCanvas.width;
+                canvas.height = goldenRatioHeight;
+                const tempCtx = canvas.getContext('2d');
+                tempCtx.fillStyle = 'black';
+                tempCtx.fillRect(0, 0, canvas.width, canvas.height);
+                tempCtx.drawImage(chakraCanvas, 0, (canvas.height - chakraCanvas.height) / 2);
+                link.download = `chakra_visualization_${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            }
+
+            captureButton.addEventListener('click', function() {
+                captureImage();
+            });
+
+            fullscreenButton.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            });
+
+            function selfLearningFlow() {
+                const hexagram = generateHexagram();
+                const flowDirection = determineFlow(hexagram);
+                console.log(`Self-learning decision: Hexagram - ${hexagram}, Flow Direction - ${flowDirection}`);
+
+                const fibonacciValue = fibonacci(10); // Using the 10th Fibonacci number for demonstration
+                const fractalDepth = 3; // Example fractal depth
+
+                const artQuality = evaluateArtQuality(fibonacciValue, fractalDepth);
+                console.log(`Art Quality Score: ${artQuality}`);
+
+                if (artQuality > 50) {
+                    feedbackData.push({ time: new Date(), good: true });
+                    console.log('Self-learning decision: Good');
+                } else {
+                    feedbackData.push({ time: new Date(), good: false });
+                    console.log('Self-learning decision: Bad');
+                }
+
+                localStorage.setItem('feedbackData', JSON.stringify(feedbackData));
+
+                // Adjust weights based on recent feedback using a simple gradient descent approach
+                let recentFeedback = feedbackData.slice(-10); // Consider the last 10 feedback entries
+                let goodCount = recentFeedback.filter(data => data.good).length;
+              let badCount = recentFeedback.length - goodCount;
+
+                // Update weights: the more "good" feedback, the higher the weight
+                weights[0] = goodCount / recentFeedback.length;
+                weights[1] = badCount / recentFeedback.length;
+                weights[2] = (weights[0] + weights[1]) / 2; // Example adjustment, you can refine this
+
+                localStorage.setItem('weights', JSON.stringify(weights));
+
+                setTimeout(selfLearningFlow, 9000); // Schedule the next self-learning decision in 9 seconds
+            }
+
+            function autoCapture() {
+                if (checkIfGoodTime()) {
+                    captureImage();
+                }
+                setTimeout(autoCapture, 9000); // Schedule the next capture in 9 seconds
+            }
+
+            function checkIfGoodTime() {
+                const currentTime = new Date();
+                const currentSeconds = currentTime.getSeconds() + currentTime.getMilliseconds() / 1000;
+                const totalGood = feedbackData.reduce((acc, data) => acc + (data.good ? 1 : 0), 0);
+                const totalBad = feedbackData.length - totalGood;
+
+                if (totalGood > 0 && totalBad > 0) {
+                    const goodAverage = feedbackData.filter(data => data.good).reduce((acc, data) => acc + (new Date(data.time)).getSeconds() + (new Date(data.time)).getMilliseconds() / 1000, 0) / totalGood;
+                    const badAverage = feedbackData.filter(data => !data.good).reduce((acc, data) => acc + (new Date(data.time)).getSeconds() + (new Date(data.time)).getMilliseconds() / 1000, 0) / totalBad;
+
+                    // Apply weights to the decision
+                    return (Math.abs(currentSeconds - goodAverage) * weights[0]) < (Math.abs(currentSeconds - badAverage) * weights[1]);
+                }
+
+                return false;
+            }
+
+            // Start the self-learning process and automatic capturing
+            selfLearningFlow();
+            setTimeout(autoCapture, 9000); // Start the first capture in 9 seconds
+
+            animateWaves();
+        });
+    </script>
+</body>
+</html>
