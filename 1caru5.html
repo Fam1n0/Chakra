@@ -63,7 +63,7 @@
             let zoom = parseFloat(zoomSlider.value);
             let orientationData = { alpha: 0, beta: 0, gamma: 0 };
             let feedbackData = JSON.parse(localStorage.getItem('feedbackData')) || [];
-            let weights = [1, 1, 1]; // Initial weights for feedback, time, and orientation
+            let weights = JSON.parse(localStorage.getItem('weights')) || [1, 1, 1];
 
             // Teaching Icarus: Fibonacci Sequence
             function fibonacci(n) {
@@ -98,6 +98,7 @@
                 chakraCanvas.width = width;
                 chakraCanvas.height = height;
                 ctx.scale(1, 1);
+                console.log('Canvas resized:', width, height);
             }
 
             resizeCanvas();
@@ -226,7 +227,7 @@
                 // Adjust weights based on recent feedback using a simple gradient descent approach
                 let recentFeedback = feedbackData.slice(-10); // Consider the last 10 feedback entries
                 let goodCount = recentFeedback.filter(data => data.good).length;
-              let badCount = recentFeedback.length - goodCount;
+                let badCount = recentFeedback.length - goodCount;
 
                 // Update weights: the more "good" feedback, the higher the weight
                 weights[0] = goodCount / recentFeedback.length;
