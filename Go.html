@@ -77,7 +77,9 @@
             function drawFractal(x, y, size, depth) { if (depth === 0) { ctx.fillRect(x, y, size, size); return; } size /= 3; drawFractal(x, y, size, depth - 1); drawFractal(x + size, y, size, depth - 1); drawFractal(x + 2 * size, y, size, depth - 1); drawFractal(x, y + size, size, depth - 1); drawFractal(x + 2 * size, y + size, size, depth - 1); drawFractal(x, y + 2 * size, size, depth - 1); drawFractal(x + size, y + 2 * size, size, depth - 1); drawFractal(x + 2 * size, y + 2 * size, size, depth - 1); }
             function evaluateArtQuality(fibonacciValue, fractalDepth) { return fibonacciValue * fractalDepth; }
             function resizeCanvas() { const width = window.innerWidth; const height = window.innerHeight; chakraCanvas.width = width; chakraCanvas.height = height; ctx.scale(1, 1); }
-            resizeCanvas();function drawWave(ctx, x, y, radius, color, sides, angleOffset) { ctx.beginPath(); for (let i = 0; i < sides; i++) { const angle = i * 2 * Math.PI / sides + angleOffset; ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle)); } ctx.closePath(); ctx.strokeStyle = color; ctx.stroke(); }
+            resizeCanvas();
+
+            function drawWave(ctx, x, y, radius, color, sides, angleOffset) { ctx.beginPath(); for (let i = 0; i < sides; i++) { const angle = i * 2 * Math.PI / sides + angleOffset; ctx.lineTo(x + radius * Math.cos(angle), y + radius * Math.sin(angle)); } ctx.closePath(); ctx.strokeStyle = color; ctx.stroke(); }
             function drawMandala(ctx, x, y, radius, color, sides, angleOffset) {
                 const numberOfLayers = 5;
                 const layerSeparation = 20;
@@ -136,10 +138,8 @@
             fullscreenButton.addEventListener('click', function() {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen();
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    }
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
                 }
             });
 
@@ -186,7 +186,9 @@
                     chakra.speed = weights[2] * Math.random();
                 });
                 setTimeout(selfLearningFlow, 9000);
-            }function setupAudio() {
+            }
+
+            function setupAudio() {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const analyser = audioCtx.createAnalyser();
                 analyser.fftSize = 2048;
@@ -217,9 +219,7 @@
 
             setupAudio();
             animateWaves();
-            setTimeout(selfLearningFlow, 36000);
-
-            window.addEventListener('deviceorientation', function(event) {
+            setTimeout(selfLearningFlow, 36000);window.addEventListener('deviceorientation', function(event) {
                 orientationData.alpha = event.alpha;
                 orientationData.beta = event.beta;
                 orientationData.gamma = event.gamma;
